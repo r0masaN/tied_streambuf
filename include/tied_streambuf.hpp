@@ -4,7 +4,7 @@
 #include <streambuf>
 
 template<typename CharT, std::size_t N>
-class tied_streambuf : public std::basic_streambuf<CharT> {
+class tied_streambuf final : public std::basic_streambuf<CharT> {
     using traits_type = std::char_traits<CharT>;
     using char_type = traits_type::char_type;
     using int_type = traits_type::int_type;
@@ -17,11 +17,11 @@ public:
     explicit tied_streambuf(Streambuf *... buffers) noexcept;
 
 private:
-    std::streamsize xsputn(const char_type *s, std::streamsize n) final;
+    std::streamsize xsputn(const char_type *s, std::streamsize n);
 
-    int_type overflow(int_type c) final;
+    int_type overflow(int_type c);
 
-    int sync() final;
+    int sync();
 };
 
 template<typename First, typename... Other>
