@@ -10,7 +10,8 @@ CLASS::tied_streambuf(Streambuf *... buffers) noexcept : buffers_{buffers...} {}
 
 template<typename CharT, std::size_t N>
 std::streamsize CLASS::xsputn(const char_type *const s, const std::streamsize n) {
-    if (n == 0) return 0;
+    if (n == 0) [[unlikely]]
+        return 0;
 
     std::streamsize min_size = n;
     for (std::basic_streambuf<char_type> *const buffer : buffers_)
@@ -21,12 +22,12 @@ std::streamsize CLASS::xsputn(const char_type *const s, const std::streamsize n)
 
 template<typename CharT, std::size_t N>
 auto CLASS::overflow(const int_type c) -> int_type {
-    if (traits_type::eq_int_type(c, traits_type::eof()))
+    if (traits_type::eq_int_type(c, traits_type::eof())) [[unlikely]]
         return traits_type::not_eof(c);
 
     bool failed = false;
     for (const char_type ch = traits_type::to_char_type(c); std::basic_streambuf<char_type> *const buffer : buffers_)
-        if (traits_type::eq_int_type(buffer->sputc(ch), traits_type::eof()))
+        if (traits_type::eq_int_type(buffer->sputc(ch), traits_type::eof())) [[unlikely]]
             failed = true;
 
     return failed ? traits_type::eof() : traits_type::not_eof(c);
@@ -36,7 +37,7 @@ template<typename CharT, std::size_t N>
 int CLASS::sync() {
     bool failed = false;
     for (std::basic_streambuf<char_type> *const buffer : buffers_)
-        if (buffer->pubsync() == -1)
+        if (buffer->pubsync() == -1) [[unlikely]]
             failed = true;
 
     return failed ? -1 : 0;
